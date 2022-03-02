@@ -1,0 +1,25 @@
+{
+    "name": "Supreme Customer Statement",
+    "summary": "Customer Statement for Supreme",
+    "category": "System Tools",
+    "version": "15.0.1.0.0",
+    "author": "SystemWorks, Michael de Villiers",
+    "license": "OPL-1",
+    "description": "Customer Statement for Supreme",
+    "depends": [
+        'base',
+        'account',
+        'mail',
+    ],
+    "data": [
+        'report/partner_statement_items_views.xml',
+        'report/partner_statement_views.xml',
+        'security/ir.model.access.csv',
+        'views/res_partner_views.xml',
+        'views/res_company_views.xml',
+    ],
+    "demo": [],
+    "application": False,
+    "installable": True,
+    "auto_install": False,
+}

@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="report_partner_statement_items_document_items">
+            <t t-call="web.external_layout">
+                <t t-set="company" t-value="doc.company_id"/>
+                <div class="page" style="font-size: 11pt;font-family:'Courier 10 Pitch', 'Courier New', Courier, monospace">
+                    <div style="margin-top:2em">
+                        <table class="table table-condensed" style="font-size: 14pt;font-family:'Courier 10 Pitch', 'Courier New', Courier, monospace">
+                            <tr class="text-center">
+                                <td><strong>STATEMENT</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <table class="table table-condensed table-striped">
+                        <tr>
+                            <td class="company_address" style="width:50%">
+                                <ul class="list-unstyled" style="margin-bottom: 0;">
+
+                                    <li><span t-field="partner.name"/></li>
+                                </ul>
+                                <span t-esc="partner" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true}"/>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li>Account No:<span t-field="partner.ref"/></li>
+                                    <li>Print Date:<span t-field="doc.create_date"/></li>
+                                    <li>Transaction Start Date:<span t-esc="doc.get_date_start()"/></li>
+                                    <li>Transaction End Date:<span t-esc="doc.get_date_end()"/></li>
+                                    <li>Generated As At:<span t-esc="doc.get_date_end()"/></li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <t t-set="balance" t-value="0"/>
+                    <!-- <div class="pull-right">
+                        <table class="table table-condensed pull-right" style="page-break-inside: avoid;">
+                            <tr>
+                                <th><strong>Date Start</strong></th>
+                                <th><span t-field="doc.date_start"/></th>
+                                <th><strong>Opening Balance</strong></th>
+                                <th><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></th>
+                            </tr>
+                        </table>
+                    </div> -->
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Transaction</th>
+                                <th>Document No</th>
+                                <th>Reference</th>
+                                <th class="text-right">Debit Amount</th>
+                                <th class="text-right">Credit Amount</th>
+                                <th class="text-right">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="doc.get_statement_lines(partner)" t-as="line">
+                                <t t-set="balance" t-value="balance + line.amount_residual"/>
+                                <td><span t-field="line.date"/></td>
+                                <td><span t-field="line.move_id.move_type"/></td>
+                                <td><span t-field="line.move_id.name"/></td>
+                                <td><span t-field="line.move_id.ref"/></td>
+                                <td class="text-right"><span t-esc="doc.get_debit(line)" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="doc.get_credit(line)" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                            </tr>
+                            <tr>
+                                <td><span>E.&amp;.O.E</span></td>
+                                <td><span></span></td>
+                                <td><span/></td>
+                                <td><span/></td>
+                                <td><span/></td>
+                                <td><span/>Total Due</td>
+                                <td class="text-right"><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered table-condensed" style="page-break-inside: avoid;">
+                        <thead>
+                            <tr style="page-break-inside: avoid;">
+                                <th class="text-right">150+ Days</th>
+                                <th class="text-right">120 Days</th>
+                                <th class="text-right">90 Days</th>
+                                <th class="text-right">60 Days</th>
+                                <th class="text-right">30 Days</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="page-break-inside: avoid;">
+                                <td class="text-right"><span t-esc="(round(doc.get_ageing_items(partner, 120), 2))" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="(round(doc.get_ageing_items(partner, 90, 119), 2))" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="(round(doc.get_ageing_items(partner, 60, 89), 2))" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="(round(doc.get_ageing_items(partner, 30, 59), 2))" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                                <td class="text-right"><span t-esc="(round(doc.get_ageing_items(partner, 0, 29), 2))" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- <div class="pull-right">
+                        <table class="table table-condensed pull-right" style="page-break-inside: avoid;">
+                            <tr>
+                                <th><strong>Date End</strong></th>
+                                <th><span t-field="doc.date_end"/></th>
+                                <th><strong>Account Balance</strong></th>
+                                <th><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': partner.currency_id}"/></th>
+                            </tr>
+                        </table>
+                    </div> -->
+                    <div style="page-break-inside:avoid;">
+                      <div class="pull-left" style="page-break-inside:avoid;">
+                        <table class="table table-bordered 1px solid #000000 !important jam"  style="border-spacing: 0; border-width: 0; padding: 0; border-width: 0;margin: 0;" cellpadding="0" cellspacing="0">
+                            <thead>
+                                <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                    <th class="text-left" style='text-left' scope="col">Account Correspondence and Proof Of Payment</th>
+                                </tr>
+                                <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                    <th class="text-left" style='text-left' scope="col">(Please Quote Account Number on Direct Deposit)</th>
+                                </tr>
+                            </thead>
+                          </table>
+
+                          <table class="table table-bordered 1px solid #000000 !important jam"  style="border-spacing: 0; border-width: 0; padding: 0; border-width: 0;margin: 0;" cellpadding="0" cellspacing="0">
+                              <tbody>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="col"><strong>Credit Controller</strong></th>
+                                      <td><span t-if="doc.get_user()" t-esc="doc.get_user().name"/></td>
+                                  </tr>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="row"><strong>Telesales Clerk</strong></th>
+                                      <td><span t-if="doc.get_bank(partner)" t-esc="doc.get_bank(partner).acc_number"/></td>
+                                  </tr>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="row"><strong>Email Address</strong></th>
+                                      <td><span t-if="doc.get_user().email" t-esc="doc.get_user().email"/></td>
+                                  </tr>
+                              </tbody>
+                          </table>
+
+                        </div>
+
+                        <div class="pull-right" style="page-break-inside:avoid;">
+                          <table class="table table-bordered 1px solid 	#000000 !important jam" style="border-spacing: 0; border-width: 0; padding: 0; border-width: 0;margin: 0;" cellpadding="0" cellspacing="0">
+                              <thead>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th class="text-left" style='text-left' scope="col">Banking Details</th>
+                                  </tr>
+                              </thead>
+                              </table>
+                              <table class="table table-bordered 1px solid #000000 !important jam"  style="border-spacing: 0; border-width: 0; padding: 0; border-width: 0;margin: 0;" cellpadding="0" cellspacing="0">
+                              <tbody>
+                                <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                    <th scope="row"><strong>Payable To</strong></th>
+                                    <td><span t-if="doc.get_company()" t-esc="doc.get_company().name"/></td>
+                                </tr>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="row"><strong>Bank</strong></th>
+                                      <td><span t-if="doc.get_company().bank" t-esc="doc.get_company().bank"/></td>
+                                  </tr>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="row"><strong>Branch Number</strong></th>
+                                      <td><span t-if="doc.get_company().branch" t-esc="doc.get_company().branch"/></td>
+                                  </tr>
+                                  <tr atyle="margin:0;padding:0;overflow-x:hidden;">
+                                      <th scope="row"><strong>Current Account</strong></th>
+                                      <td><span t-if="doc.get_company().current_account" t-esc="doc.get_company().current_account"/></td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                        </div>
+
+                    </div>
+                    <div style="width: 100%; display: table;font-size: 10pt;font-family:'Courier 10 Pitch', 'Courier New', Courier, monospace">
+                      <br/>
+                      <p>***Please use Account Number as reference on all payments.***</p>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <record id="action_report_partner_statement_items" model="ir.actions.report">
+            <field name="name">Customer Statements</field>
+            <field name="model">partner.statement</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">supreme_statement.report_partner_statement_items</field>
+            <field name="report_file">supreme_statement.report_partner_statement_items</field>
+            <field name="print_report_name">(object.get_report_base_filename())</field>
+        </record>
+
+        <record id="mail_template_partner_statement_items" model="mail.template">
+            <field name="name">Customer Statement Open Items: Send by email</field>
+            <field name="email_from">${user.email}</field>
+            <field name="subject">${object.company_id.name} Customer Statement</field>
+            <field name="email_to">	${','.join(object.partner_ids.mapped('email'))}</field>
+            <field name="reply_to"></field>
+            <field name="auto_delete" eval="True" />
+            <field name="model_id" ref="model_partner_statement"/>
+            <field name="report_template" ref="action_report_partner_statement_items"/>
+            <field name="report_name">${object.company_id.name} Customer Statement</field>
+            <field name="lang"></field>
+            <field name="body_html"><![CDATA[<p>Dear ${object.partner_ids.name},<br/><br/>Please see the attached customer statement for the period ${object.date_start} and ${object.date_end}.<br/><br/>If you have any questions regarding this statement, please contact our accounts repartment at +27 31 564 7727 or send an email to reception@samd.co.za.<br/><br/>We thank you for your continued support.<br/><br/>Best Regards,<br/>${user.company_id.name}</p>]]></field>
+        </record>
+
+        <record id="action_partner_statement_items" model="ir.actions.act_window">
+            <field name="name">Customer Statements</field>
+            <field name="res_model">partner.statement</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_partner_statement_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <record id="action_partner_statement_items_print" model="ir.actions.act_window">
+            <field name="name">Customer Statements</field>
+            <field name="res_model">partner.statement</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_partner_statement_print_form"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="base.model_res_partner"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <record id="action_partner_statement_items_send" model="ir.actions.act_window">
+            <field name="name">Send Customer Statements</field>
+            <field name="res_model">partner.statement</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_partner_statement_send_form"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="base.model_res_partner"/>
+        </record>
+    </data>
+</odoo>
